@@ -1,0 +1,52 @@
+{mapping, "rabbitmq.address", "emqx_rabbitmq.server", [
+  {default, {"127.0.0.1", 5672}},
+  {datatype, [integer, ip, string]}
+]}.
+
+{mapping, "rabbitmq.pool", "emqx_rabbitmq.server", [
+  {default, 8},
+  {datatype, integer}
+]}.
+
+{mapping, "rabbitmq.username", "emqx_rabbitmq.server", [
+  {default, ""},
+  {datatype, string}
+]}.
+
+{mapping, "rabbitmq.password", "emqx_rabbitmq.server", [
+  {default, ""},
+  {datatype, string}
+]}.
+
+{mapping, "rabbitmq.exchange", "emqx_rabbitmq.server", [
+  {default, "/"},
+  {datatype, string}
+]}.
+
+{mapping, "rabbitmq.keepalive", "emqx_rabbitmq.server", [
+  {default, "30s"},
+  {datatype, {duration, ms}}
+]}.
+
+{translation, "emqx_mysql.server", fun(Conf) ->
+  {MyHost, MyPort} =
+  case cuttlefish:conf_get("mysql.address", Conf) of
+    {Ip, Port} -> {Ip, Port};
+    S          -> case string:tokens(S, ":") of
+                    [Domain]       -> {Domain, 3306};
+                    [Domain, Port] -> {Domain, list_to_integer(Port)}
+                  end
+    end,
+  Pool = cuttlefish:conf_get("mysql.pool", Conf),
+  Username = cuttlefish:conf_get("mysql.username", Conf),
+  Password = cuttlefish:conf_get("mysql.password", Conf),
+  Exchange = cuttlefish:conf_get("mysql.exchange", Conf),
+  Keepalive = cuttlefish:conf_get("mysql.keepalive", Conf),
+  [{pool_size, Pool},
+   {host, MyHost},
+   {port, MyPort},
+   {username, Username},
+   {password, Password},
+   {virtual_host, Exchange},
+   {heartbeat, Keepalive}]
+end}.
