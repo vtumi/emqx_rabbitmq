@@ -1,52 +1,75 @@
-{mapping, "rabbitmq.address", "emqx_rabbitmq.server", [
-  {default, {"127.0.0.1", 5672}},
-  {datatype, [integer, ip, string]}
+%%-*- mode: erlang -*-
+%% emqx_rabbitmq config mapping
+{mapping, "rabbitmq.host", "emqx_rabbitmq.server", [
+  {datatype, string}
 ]}.
 
-{mapping, "rabbitmq.pool", "emqx_rabbitmq.server", [
-  {default, 8},
+{mapping, "rabbitmq.port", "emqx_rabbitmq.server", [
   {datatype, integer}
 ]}.
 
 {mapping, "rabbitmq.username", "emqx_rabbitmq.server", [
-  {default, ""},
+  {default, "guest"},
   {datatype, string}
 ]}.
 
 {mapping, "rabbitmq.password", "emqx_rabbitmq.server", [
-  {default, ""},
+  {default, "guest"},
   {datatype, string}
 ]}.
 
-{mapping, "rabbitmq.exchange", "emqx_rabbitmq.server", [
-  {default, "/"},
+{mapping, "rabbitmq.pool", "emqx_rabbitmq.server", [
+  {default, 1},
+  {datatype, integer}
+]}.
+
+{mapping, "rabbitmq.reconnect", "emqx_rabbitmq.server", [
+  {default, 3},
+  {datatype, integer}
+]}.
+
+{mapping, "rabbitmq.client.connected", "emqx_rabbitmq.client_connected", [
+  {default, on},
+  {datatype, flag}
+]}.
+
+{mapping, "rabbitmq.client.disconnected", "emqx_rabbitmq.client_disconnected", [
+  {default, on},
+  {datatype, flag}
+]}.
+
+{mapping, "rabbitmq.message.publish", "emqx_rabbitmq.message_publish", [
+  {default, on},
+  {datatype, flag}
+]}.
+
+{mapping, "rabbitmq.exchange", "emqx_rabbitmq.exchange", [
+  {default, "mqtt.events"},
   {datatype, string}
 ]}.
 
-{mapping, "rabbitmq.keepalive", "emqx_rabbitmq.server", [
-  {default, "30s"},
-  {datatype, {duration, ms}}
-]}.
-
-{translation, "emqx_mysql.server", fun(Conf) ->
-  {MyHost, MyPort} =
-  case cuttlefish:conf_get("mysql.address", Conf) of
-    {Ip, Port} -> {Ip, Port};
-    S          -> case string:tokens(S, ":") of
-                    [Domain]       -> {Domain, 3306};
-                    [Domain, Port] -> {Domain, list_to_integer(Port)}
-                  end
-    end,
-  Pool = cuttlefish:conf_get("mysql.pool", Conf),
-  Username = cuttlefish:conf_get("mysql.username", Conf),
-  Password = cuttlefish:conf_get("mysql.password", Conf),
-  Exchange = cuttlefish:conf_get("mysql.exchange", Conf),
-  Keepalive = cuttlefish:conf_get("mysql.keepalive", Conf),
-  [{pool_size, Pool},
-   {host, MyHost},
-   {port, MyPort},
-   {username, Username},
-   {password, Password},
-   {virtual_host, Exchange},
-   {heartbeat, Keepalive}]
+{translation, "emqx_rabbitmq.exchange", fun(Conf) ->
+      list_to_binary(cuttlefish:conf_get("rabbitmq.exchange", Conf))
 end}.
+
+{translation, "emqx_rabbitmq.server", fun(Conf) ->
+    Pool = cuttlefish:conf_get("rabbitmq.pool", Conf),
+    Host = cuttlefish:conf_get("rabbitmq.host", Conf),
+    Port = cuttlefish:conf_get("rabbitmq.port", Conf),
+    Username = list_to_binary(cuttlefish:conf_get("rabbitmq.username", Conf)),
+    Password = list_to_binary(cuttlefish:conf_get("rabbitmq.password", Conf)),
+    ReconnSecs = cuttlefish:conf_get("rabbitmq.reconnect", Conf),
+    Reconn = case ReconnSecs of
+                0 -> false;
+                _ -> ReconnSecs
+             end,
+    [{pool_size, Pool},
+     {host, Host},
+     {port, Port},
+     {auto_reconnect, Reconn},
+     {username, Username},
+     {password, Password}
+    ]
+end}.
+
+

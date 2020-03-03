@@ -1,23 +1,24 @@
-## shallow clone for speed
+PROJECT = emqx_rabbitmq
+PROJECT_DESCRIPTION = EMQ X Rabbitmq Hook
 
-REBAR_GIT_CLONE_OPTIONS += --depth 1
-export REBAR_GIT_CLONE_OPTIONS
+CUR_BRANCH := $(shell git branch | grep -e "^*" | cut -d' ' -f 2)
+BRANCH := $(if $(filter $(CUR_BRANCH), master develop), $(CUR_BRANCH), develop)
+DEPS = lager amqp_client ecpool bson
+BUILD_DEPS = emqx cuttlefish
+dep_emqx = git-emqx https://github.com/emqx/emqx $(BRANCH)
+dep_cuttlefish = git-emqx https://github.com/emqx/cuttlefish v2.2.1
+dep_lager = git-emqx https://github.com/erlang-lager/lager master
+dep_amqp_client = git-emqx https://github.com/rabbitmq/rabbitmq-erlang-client master
+dep_ecpool = git-emqx https://github.com/emqx/ecpool v0.3.0
+dep_bson = git-emqx https://github.com/comtihon/bson-erlang master
+ERLC_OPTS += +debug_info
 
-REBAR = rebar3
-all: compile
+NO_AUTOPATCH = cuttlefish
 
-compile:
-	$(REBAR) compile
+COVER = true
 
-ct: compile
-	$(REBAR) as test ct -v
+$(shell [ -f erlang.mk ] || curl -s -o erlang.mk https://raw.githubusercontent.com/emqx/erlmk/master/erlang.mk)
 
-eunit: compile
-	$(REBAR) as test eunit
-
-xref:
-	$(REBAR) xref
-
-clean:
-	@rm -rf _build
-	@rm -f data/app.*.config data/vm.*.args rebar.lock
+include erlang.mk
+app.config::
+	./deps/cuttlefish/cuttlefish -l info -e etc/ -c etc/emqx_rabbitmq.conf -i priv/emqx_rabbitmq.schema -d data
