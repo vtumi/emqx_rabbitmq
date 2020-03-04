@@ -4,17 +4,18 @@
 
 -include("emqx_rabbitmq.hrl").
 -include("../../amqp_client/include/amqp_client.hrl").
+
 -export([connect/1]).
 -export([ensure_exchange/1, publish/3]).
 
-connect(Opts) ->
-  ConnOpts = #amqp_params_network{
-    host = proplists:get_value(host, Opts),
-    port = proplists:get_value(port, Opts),
-    username = proplists:get_value(username, Opts),
-    password = proplists:get_value(password, Opts)
+connect(Options) ->
+  Params = #amqp_params_network{
+    host = proplists:get_value(host, Options),
+    port = proplists:get_value(port, Options),
+    username = proplists:get_value(username, Options),
+    password = proplists:get_value(password, Options)
   },
-  {ok, C} = amqp_connection:start(ConnOpts),
+  {ok, C} = amqp_connection:start(Params),
   {ok, C}.
 
 ensure_exchange(ExchangeName) ->
@@ -36,5 +37,3 @@ publish(ExchangeName, Payload, RoutingKey, Conn) ->
   Msg = #amqp_msg{props = Props, payload = Payload},
   amqp_channel:cast(Channel, Publish, Msg),
   amqp_channel:close(Channel).
-
-
