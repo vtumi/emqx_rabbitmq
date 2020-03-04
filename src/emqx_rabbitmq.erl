@@ -37,7 +37,7 @@ on_client_connected(#{client_id := ClientId, username := Username}, ConnAck, Con
     connected_at, emqx_time:now_ms(maps:get(connected_at, ConnInfo)),
     conn_ack, ConnAck
   },
-  emqx_rabbitmq_cli:publish(ExchangeName, bson_binary:put_document(Doc), <<"client.connected">>),
+  emqx_rabbitmq_cli:publish(ExchangeName, list_to_binary(Doc), <<"client.connected">>),
   ok.
 
 
@@ -57,7 +57,7 @@ on_client_disconnected(#{client_id := ClientId, username := Username}, ReasonCod
     disconnected_at, emqx_time:now_ms(),
     reason, Reason
   },
-  emqx_rabbitmq_cli:publish(ExchangeName, bson_binary:put_document(Doc), <<"client.disconnected">>),
+  emqx_rabbitmq_cli:publish(ExchangeName, list_to_binary(Doc), <<"client.disconnected">>),
   ok.
 
 
@@ -69,16 +69,15 @@ on_message_publish(Message = #message{topic = Topic, flags = #{retain := Retain}
                {ok, Value} -> Value;
                _ -> undefined
              end,
-  Doc = {
-    client_id, Message#message.from,
-    username, Username,
-    topic, Topic,
-    qos, Message#message.qos,
-    retained, Retain,
-    payload, {bin, bin, Message#message.payload},
-    published_at, emqx_time:now_ms(Message#message.timestamp)
-  },
-  emqx_rabbitmq_cli:publish(ExchangeName, bson_binary:put_document(Doc), <<"message.publish">>),
+  Params = #{ client_id => Message#message.from
+                  , username => Username
+                  , topic => Message#message.topic
+                  , qos => Message#message.qos
+                  , retain => Retain
+                  , payload => Message#message.payload
+                  , publish_at => Message#message.timestamp
+                  },
+  emqx_rabbitmq_cli:publish(ExchangeName, emqx_json:encode(Params), <<"message.publish">>),
   {ok, Message}.
 
 %% Called when the plugin application stop
