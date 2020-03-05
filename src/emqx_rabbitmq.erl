@@ -22,7 +22,7 @@ on_message_publish(Message = #message{id = Id, topic = Topic, qos = Qos, payload
                 , qos => Qos
                 , retain => format_retain(Retain)
                 , payload => Payload
-                , create_at => format_timestamp(Timestamp)
+                , create_at => list_to_binary(format_timestamp(Timestamp))
       },
       emqx_rabbitmq_cli:publish(ExchangeName, emqx_json:encode(Params), <<"message.publish">>);
     true ->
