@@ -50,14 +50,6 @@ config_callback([_, _, "password"], Value) ->
   {ok, Env} = application:get_env(?APP, server),
   application:set_env(?APP, server, lists:keyreplace(password, 1, Env, {list_to_binary(password), Value})),
   " successfully\n";
-config_callback([_, _, "exchange"], Value) ->
-  {ok, Env} = application:get_env(?APP, server),
-  application:set_env(?APP, server, lists:keyreplace(exchange, 1, Env, {list_to_binary(exchange), Value})),
-  " successfully\n";
-config_callback([_, _, "Keepalive"], Value) ->
-  {ok, Env} = application:get_env(?APP, server),
-  application:set_env(?APP, server, lists:keyreplace(heartbeat, 1, Env, {heartbeat, Value})),
-  " successfully\n";
 config_callback([_, _, Key0], Value) ->
   Key = list_to_atom(Key0),
   {ok, Env} = application:get_env(?APP, server),
@@ -71,11 +63,12 @@ unregister_config() ->
 
 keys() ->
   ["rabbitmq.address",
-   "rabbitmq.pool",
    "rabbitmq.username",
    "rabbitmq.password",
-   "rabbitmq.exchange",
-   "rabbitmq.keepalive"].
+   "rabbitmq.heartbeat",
+   "rabbitmq.connection_timeout",
+   "rabbitmq.auto_reconnect",
+   "rabbitmq.pool"].
 
 parse_servers(Value) ->
   case string:tokens(Value, ":") of

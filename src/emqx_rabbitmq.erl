@@ -12,6 +12,7 @@
 on_message_publish(Message = #message{topic = <<"$SYS/", _/binary>>}, _Env) ->
   {ok, Message};
 on_message_publish(Message = #message{id = Id, topic = Topic, qos = Qos, payload = Payload, timestamp = Timestamp, headers = #{username := Username, peername := {Peerhost, _}}, flags = #{retain := Retain}}, ExchangeName) ->
+  emqx_metrics:inc('rabbitmq.message.publish'),
   if
     Qos > 0 ->
       Params = #{ mid => emqx_guid:to_hexstr(Id)

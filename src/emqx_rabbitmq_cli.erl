@@ -14,7 +14,8 @@ connect(Options) ->
     port = proplists:get_value(port, Options),
     username = proplists:get_value(username, Options),
     password = proplists:get_value(password, Options),
-    heartbeat = proplists:get_value(heartbeat, Options)
+    heartbeat = proplists:get_value(heartbeat, Options),
+    connection_timeout = proplists:get_value(connection_timeout, Options)
   },
   {ok, C} = amqp_connection:start(Params),
   {ok, C}.

@@ -3,11 +3,6 @@
   {datatype, [integer, ip, string]}
 ]}.
 
-{mapping, "rabbitmq.pool", "emqx_rabbitmq.server", [
-  {default, 8},
-  {datatype, integer}
-]}.
-
 {mapping, "rabbitmq.username", "emqx_rabbitmq.server", [
   {default, "guest"},
   {datatype, string}
@@ -18,19 +13,25 @@
   {datatype, string}
 ]}.
 
-{mapping, "rabbitmq.exchange", "emqx_rabbitmq.exchange", [
-  {default, "mqtt.events"},
-  {datatype, string}
+{mapping, "rabbitmq.heartbeat", "emqx_rabbitmq.server", [
+  {default, "15s"},
+  {datatype, {duration, s}}
 ]}.
 
-{mapping, "rabbitmq.keepalive", "emqx_rabbitmq.server", [
+{mapping, "rabbitmq.connection_timeout", "emqx_rabbitmq.server", [
   {default, "30s"},
   {datatype, {duration, s}}
 ]}.
 
-{translation, "emqx_rabbitmq.exchange", fun(Conf) ->
-  list_to_binary(cuttlefish:conf_get("rabbitmq.exchange", Conf))
-end}.
+{mapping, "rabbitmq.auto_reconnect", "emqx_rabbitmq.server", [
+  {default, 1},
+  {datatype, integer}
+]}.
+
+{mapping, "rabbitmq.pool", "emqx_rabbitmq.server", [
+  {default, 8},
+  {datatype, integer}
+]}.
 
 {translation, "emqx_rabbitmq.server", fun(Conf) ->
   {MyHost, MyPort} =
@@ -41,14 +42,18 @@ end}.
       [Domain, Port] -> {Domain, list_to_integer(Port)}
     end
   end,
-  Pool = cuttlefish:conf_get("rabbitmq.pool", Conf),
   Username = list_to_binary(cuttlefish:conf_get("rabbitmq.username", Conf)),
   Password = list_to_binary(cuttlefish:conf_get("rabbitmq.password", Conf)),
-  Keepalive = cuttlefish:conf_get("rabbitmq.keepalive", Conf),
-  [{pool_size, Pool},
-   {host, MyHost},
+  Heartbeat = cuttlefish:conf_get("rabbitmq.heartbeat", Conf),
+  ConnectionTimeout = cuttlefish:conf_get("rabbitmq.connection_timeout", Conf),
+  AutoReconnect = cuttlefish:conf_get("rabbitmq.auto_reconnect", Conf),
+  Pool = cuttlefish:conf_get("rabbitmq.pool", Conf),
+  [{host, MyHost},
    {port, MyPort},
    {username, Username},
    {password, Password},
-   {heartbeat, Keepalive}]
+   {heartbeat, Heartbeat},
+   {connection_timeout, ConnectionTimeout},
+   {auto_reconnect, AutoReconnect},
+   {pool_size, Pool}]
 end}.
