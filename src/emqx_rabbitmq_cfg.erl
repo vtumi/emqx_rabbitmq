@@ -42,14 +42,6 @@ config_callback([_, _, "pool"], Value) ->
   {ok, Env} = application:get_env(?APP, server),
   application:set_env(?APP, server, lists:keyreplace(pool_size, 1, Env, {pool_size, Value})),
   " successfully\n";
-config_callback([_, _, "username"], Value) ->
-  {ok, Env} = application:get_env(?APP, server),
-  application:set_env(?APP, server, lists:keyreplace(username, 1, Env, {list_to_binary(username), Value})),
-  " successfully\n";
-config_callback([_, _, "password"], Value) ->
-  {ok, Env} = application:get_env(?APP, server),
-  application:set_env(?APP, server, lists:keyreplace(password, 1, Env, {list_to_binary(password), Value})),
-  " successfully\n";
 config_callback([_, _, Key0], Value) ->
   Key = list_to_atom(Key0),
   {ok, Env} = application:get_env(?APP, server),
