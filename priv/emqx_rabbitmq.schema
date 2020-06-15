@@ -41,7 +41,6 @@
   Password = list_to_binary(cuttlefish:conf_get("rabbitmq.password", Conf)),
   Heartbeat = cuttlefish:conf_get("rabbitmq.heartbeat", Conf),
   ConnectionTimeout = cuttlefish:conf_get("rabbitmq.connection_timeout", Conf),
-  AutoReconnect = cuttlefish:conf_get("rabbitmq.auto_reconnect", Conf),
   Pool = cuttlefish:conf_get("rabbitmq.pool", Conf),
   [{host, MyHost},
    {port, MyPort},
@@ -49,6 +48,5 @@
    {password, Password},
    {heartbeat, Heartbeat},
    {connection_timeout, ConnectionTimeout},
-   {auto_reconnect, AutoReconnect},
    {pool_size, Pool}]
 end}.

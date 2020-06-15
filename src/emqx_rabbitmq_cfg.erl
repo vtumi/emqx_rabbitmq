@@ -59,7 +59,6 @@ keys() ->
    "rabbitmq.password",
    "rabbitmq.heartbeat",
    "rabbitmq.connection_timeout",
-   "rabbitmq.auto_reconnect",
    "rabbitmq.pool"].
 
 parse_servers(Value) ->
