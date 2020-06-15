@@ -23,11 +23,6 @@
   {datatype, {duration, s}}
 ]}.
 
-{mapping, "rabbitmq.auto_reconnect", "emqx_rabbitmq.server", [
-  {default, 1},
-  {datatype, integer}
-]}.
-
 {mapping, "rabbitmq.pool", "emqx_rabbitmq.server", [
   {default, 8},
   {datatype, integer}
